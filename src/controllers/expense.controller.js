@@ -1,4 +1,5 @@
-const { createExpense,getAllExpenses } = require("../services/expense.service");
+const { createExpense,getAllExpenses,getExpenseSummary,
+ } = require("../services/expense.service");
 
 /**
  * Create a new expense.
@@ -33,7 +34,27 @@ async function getExpenses(req, res, next) {
     next(error);
   }
 }
+
+
+
+/**
+ * Get expense summary.
+ */
+async function getSummary(req, res, next) {
+  try {
+    const summary = await getExpenseSummary();
+
+    return res.status(200).json({
+      success: true,
+      data: summary,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
 module.exports = {
   addExpense,
    getExpenses,
+   getSummary,
+
 };

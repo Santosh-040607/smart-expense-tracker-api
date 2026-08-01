@@ -44,7 +44,39 @@ async function getAllExpenses(category) {
   );
 }
 
+/**
+ * Calculate expense summary.
+ *
+ * @returns {Promise<Object>}
+ */
+async function getExpenseSummary() {
+  const expenses = await readExpenses();
+
+  const summary = expenses.reduce(
+    (accumulator, expense) => {
+      accumulator.totalExpenses += expense.amount;
+
+      if (!accumulator.categoryTotals[expense.category]) {
+        accumulator.categoryTotals[expense.category] = 0;
+      }
+
+      accumulator.categoryTotals[expense.category] += expense.amount;
+
+      return accumulator;
+    },
+    {
+      totalExpenses: 0,
+      categoryTotals: {},
+    }
+  );
+
+  return summary;
+}
+
+
 module.exports = {
-  createExpense,
+   createExpense,
    getAllExpenses,
+   getExpenseSummary,
+
 };
