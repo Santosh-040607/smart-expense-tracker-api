@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "id": "e25bb7ee-a49b-4d92-9621-2a202832be9a",
+    "title": "Lunch",
+    "amount": 250,
+    "category": "Food",
+    "date": "2026-08-01"
+  }
+]
