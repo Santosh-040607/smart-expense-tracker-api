@@ -184,7 +184,7 @@ POST /api/expenses
 
 ## Future Improvements
 - Possible enhancements include:
-- Update expense endpoint
+- Update expense endpoint(PUT/PATCH)
 - Pagination
 - Authentication and authorization
 - Database integration (MongoDB or PostgreSQL)
