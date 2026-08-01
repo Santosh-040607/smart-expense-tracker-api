@@ -74,9 +74,40 @@ async function getExpenseSummary() {
 }
 
 
+/**
+ * Delete an expense by ID.
+ *
+ * @param {string} id
+ * @returns {Promise<boolean>}
+ */
+async function deleteExpense(id) {
+  const expenses = await readExpenses();
+
+  // Check if expense exists
+  const expenseExists = expenses.some((expense) => expense.id === id);
+
+  if (!expenseExists) {
+    const error = new Error("Expense not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  // Remove the matching expense
+  const updatedExpenses = expenses.filter(
+    (expense) => expense.id !== id
+  );
+
+  await writeExpenses(updatedExpenses);
+
+  return true;
+}
+
+
 module.exports = {
    createExpense,
    getAllExpenses,
    getExpenseSummary,
+   deleteExpense,
+
 
 };

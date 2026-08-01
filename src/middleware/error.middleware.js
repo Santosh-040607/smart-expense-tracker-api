@@ -5,14 +5,19 @@
  * and returns a consistent JSON response.
  */
 
+/**
+ * Centralized error handling middleware.
+ */
 function errorHandler(err, req, res, next) {
-  // Log the error for debugging
   console.error(err);
 
-  return res.status(500).json({
+  const statusCode = err.statusCode || 500;
+
+  return res.status(statusCode).json({
     success: false,
-    message: "Internal Server Error",
+    message: err.message || "Internal Server Error",
   });
 }
 
 module.exports = errorHandler;
+

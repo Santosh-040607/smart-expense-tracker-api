@@ -1,4 +1,4 @@
-const { createExpense,getAllExpenses,getExpenseSummary,
+const { createExpense,getAllExpenses,getExpenseSummary, deleteExpense,
  } = require("../services/expense.service");
 
 /**
@@ -52,9 +52,35 @@ async function getSummary(req, res, next) {
     next(error);
   }
 }
+
+
+
+/**
+ * Delete an expense by ID.
+ */
+async function removeExpense(req, res, next) {
+  try {
+    const { id } = req.params;
+
+    await deleteExpense(id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Expense deleted successfully.",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+
+
 module.exports = {
   addExpense,
    getExpenses,
    getSummary,
+   removeExpense,
+
+
 
 };
