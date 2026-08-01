@@ -8,6 +8,33 @@ const expensesFile = path.join(
   "../src/data/expenses.json"
 );
 
+const foodExpense = {
+  title: "Lunch",
+  amount: 250,
+  category: "Food",
+  date: "2026-08-01",
+};
+
+const entertainmentExpense = {
+  title: "Movie",
+  amount: 400,
+  category: "Entertainment",
+  date: "2026-08-01",
+};
+
+const dinnerExpense = {
+  title: "Dinner",
+  amount: 300,
+  category: "Food",
+  date: "2026-08-02",
+};
+
+async function createExpense(expense) {
+  return request(app)
+    .post("/api/expenses")
+    .send(expense);
+}
+
 describe("Smart Expense Tracker API", () => {
 
   beforeEach(() => {
@@ -33,37 +60,24 @@ describe("Smart Expense Tracker API", () => {
 
     test("should create a new expense", async () => {
 
-      const newExpense = {
-        title: "Lunch",
-        amount: 250,
-        category: "Food",
-        date: "2026-08-01",
-      };
-
-      const response = await request(app)
-        .post("/api/expenses")
-        .send(newExpense);
+      const response = await createExpense(foodExpense);
 
       expect(response.statusCode).toBe(201);
       expect(response.body.success).toBe(true);
       expect(response.body.message).toBe("Expense created successfully.");
 
-      expect(response.body.data).toHaveProperty("id");
-      expect(response.body.data.title).toBe(newExpense.title);
-      expect(response.body.data.amount).toBe(newExpense.amount);
-      expect(response.body.data.category).toBe(newExpense.category);
-      expect(response.body.data.date).toBe(newExpense.date);
+      expect(response.body.data.id).toEqual(expect.any(String));
+      expect(response.body.data.title).toBe(foodExpense.title);
+      expect(response.body.data.amount).toBe(foodExpense.amount);
+      expect(response.body.data.category).toBe(foodExpense.category);
+      expect(response.body.data.date).toBe(foodExpense.date);
 
-      // Verify data was written to expenses.json
       const expenses = JSON.parse(
         fs.readFileSync(expensesFile, "utf-8")
       );
 
       expect(expenses).toHaveLength(1);
-      expect(expenses[0].title).toBe("Lunch");
-      expect(expenses[0].amount).toBe(250);
-      expect(expenses[0].category).toBe("Food");
-      expect(expenses[0].date).toBe("2026-08-01");
+      expect(expenses[0]).toMatchObject(foodExpense);
 
     });
 
@@ -90,12 +104,98 @@ describe("Smart Expense Tracker API", () => {
       expect(Array.isArray(response.body.errors)).toBe(true);
       expect(response.body.errors.length).toBeGreaterThan(0);
 
-      // Verify no data was written
       const expenses = JSON.parse(
         fs.readFileSync(expensesFile, "utf-8")
       );
 
       expect(expenses).toEqual([]);
+
+    });
+
+  });
+
+  describe("GET /api/expenses?category=Food", () => {
+
+    test("should return only food expenses", async () => {
+
+      await createExpense(foodExpense);
+      await createExpense(entertainmentExpense);
+      await createExpense(dinnerExpense);
+
+      const response = await request(app)
+        .get("/api/expenses?category=Food");
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.count).toBe(2);
+      expect(response.body.data).toHaveLength(2);
+
+      response.body.data.forEach((expense) => {
+        expect(expense.category).toBe("Food");
+      });
+
+    });
+
+  });
+
+  describe("GET /api/expenses/summary", () => {
+
+    test("should return expense summary", async () => {
+
+      await createExpense(foodExpense);
+      await createExpense(entertainmentExpense);
+      await createExpense(dinnerExpense);
+
+      const response = await request(app)
+        .get("/api/expenses/summary");
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.totalExpenses).toBe(950);
+      expect(response.body.data.categoryTotals.Food).toBe(550);
+      expect(response.body.data.categoryTotals.Entertainment).toBe(400);
+
+    });
+
+  });
+
+  describe("DELETE /api/expenses/:id", () => {
+
+    test("should delete an existing expense", async () => {
+
+      const createResponse = await createExpense(foodExpense);
+
+      const expenseId = createResponse.body.data.id;
+
+      const deleteResponse = await request(app)
+        .delete(`/api/expenses/${expenseId}`);
+
+      expect(deleteResponse.statusCode).toBe(200);
+      expect(deleteResponse.body.success).toBe(true);
+      expect(deleteResponse.body.message)
+        .toBe("Expense deleted successfully.");
+
+      const expenses = JSON.parse(
+        fs.readFileSync(expensesFile, "utf-8")
+      );
+
+      expect(expenses).toHaveLength(0);
+
+    });
+
+  });
+
+  describe("DELETE /api/expenses/:id - Not Found", () => {
+
+    test("should return 404 for non-existing expense", async () => {
+
+      const response = await request(app)
+        .delete("/api/expenses/12345678-1234-1234-1234-123456789012");
+
+      expect(response.statusCode).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.message)
+        .toBe("Expense not found.");
 
     });
 
