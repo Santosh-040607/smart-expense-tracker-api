@@ -25,12 +25,23 @@ async function createExpense(expenseData) {
   return newExpense;
 }
 /**
- * Retrieve all expenses.
+ * Retrieve expenses.
+ * If a category is provided, return only matching expenses.
  *
+ * @param {string} category
  * @returns {Promise<Array>}
  */
-async function getAllExpenses() {
-  return await readExpenses();
+async function getAllExpenses(category) {
+  const expenses = await readExpenses();
+
+  if (!category) {
+    return expenses;
+  }
+
+  return expenses.filter(
+    (expense) =>
+      expense.category.toLowerCase() === category.toLowerCase()
+  );
 }
 
 module.exports = {

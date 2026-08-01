@@ -21,7 +21,8 @@ async function addExpense(req, res, next) {
  */
 async function getExpenses(req, res, next) {
   try {
-    const expenses = await getAllExpenses();
+     const { category } = req.query;
+    const expenses = await getAllExpenses(category);
 
     return res.status(200).json({
       success: true,
