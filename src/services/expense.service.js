@@ -24,7 +24,16 @@ async function createExpense(expenseData) {
 
   return newExpense;
 }
+/**
+ * Retrieve all expenses.
+ *
+ * @returns {Promise<Array>}
+ */
+async function getAllExpenses() {
+  return await readExpenses();
+}
 
 module.exports = {
   createExpense,
+   getAllExpenses,
 };
